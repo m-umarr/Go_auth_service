@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package otp;
+
+option go_package = "github.com/m-umarr/Go_auth_service/otp_service/proto";
+
+service OTPService {
+    rpc GenerateOTP(GenerateOTPRequest) returns (GenerateOTPResponse);
+}
+
+message GenerateOTPRequest {
+    string phone_number = 1;
+}
+
+message GenerateOTPResponse {
+    bool success = 1;
+}

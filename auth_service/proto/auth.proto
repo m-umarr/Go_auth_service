@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "github.com/m-umarr/Go_auth_service/auth_service/proto";
+
+service AuthService {
+    rpc SignupWithPhoneNumber(SignupRequest) returns (SignupResponse);
+    rpc VerifyPhoneNumber(VerifyRequest) returns (VerifyResponse);
+    rpc LoginWithPhoneNumber(LoginRequest) returns (LoginResponse);
+    rpc ValidatePhoneNumberLogin(ValidateRequest) returns (ValidateResponse);
+    rpc GetProfile(ProfileRequest) returns (ProfileResponse);
+}
+
+message SignupRequest {
+    string phone_number = 1;
+}
+
+message SignupResponse {
+    bool success = 1;
+}
+
+message VerifyRequest {
+    string phone_number = 1;
+    string otp = 2;
+}
+
+message VerifyResponse {
+    bool success = 1;
+}
+
+message LoginRequest {
+    string phone_number = 1;
+}
+
+message LoginResponse {
+    bool success = 1;
+}
+
+message ValidateRequest {
+    string phone_number = 1;
+    string otp = 2;
+}
+
+message ValidateResponse {
+    bool success = 1;
+}
+
+message ProfileRequest {
+    string phone_number = 1;
+}
+
+message ProfileResponse {
+    string phone_number = 1;
+    string profile_data = 2;
+}
