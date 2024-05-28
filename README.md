@@ -1,11 +1,11 @@
 # Backend Engineer Skills Test
 
-This project demonstrates a basic setup of two microservices (`auth-service` and `otp-service`) using Golang, gRPC (Connect), PostgreSQL, and Twilio.
+This project demonstrates a basic setup of two microservices (`auth_service` and `otp_service`) using Golang, gRPC (Connect), PostgreSQL, and Twilio.
 
 ## Services
 
-- **auth-service**: Manages user authentication and profile.
-- **otp-service**: Generates OTP using Twilio's API.
+- **auth_service**: Manages user authentication and profile.
+- **otp_service**: Generates OTP using Twilio's API.
 
 ## Setup Instructions
 
@@ -16,12 +16,10 @@ This project demonstrates a basic setup of two microservices (`auth-service` and
     ```
 
 2. **Environment Variables**:
-    - Create a `.env` file in the `auth-service` and `otp-service` directories and add the following:
+    - Create a `.env` file in the `auth_service` and `otp_service` directories and add the following:
     ```env
-    # auth-service/.env
-    JWT_SECRET=your_jwt_secret
 
-    # otp-service/.env
+    # /.env
     TWILIO_ACCOUNT_SID=your_twilio_account_sid
     TWILIO_AUTH_TOKEN=your_twilio_auth_token
     ```
@@ -34,14 +32,14 @@ This project demonstrates a basic setup of two microservices (`auth-service` and
 4. **Endpoints**:
 
     - `auth-service`:
-        - `POST /auth.SignupWithPhoneNumber`
-        - `POST /auth.VerifyPhoneNumber`
-        - `POST /auth.LoginWithPhoneNumber`
-        - `POST /auth.ValidatePhoneNumberLogin`
-        - `GET /auth.GetProfile`
+        - `/auth.SignupWithPhoneNumber`
+        - `/auth.VerifyPhoneNumber`
+        - `/auth.LoginWithPhoneNumber`
+        - `/auth.ValidatePhoneNumberLogin`
+        - `/auth.GetProfile`
 
     - `otp-service`:
-        - `POST /otp.GenerateOtp`
+        - `/otp.GenerateOtp`
 
 ## Video Walkthrough
 

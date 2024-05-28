@@ -5,13 +5,23 @@ package otp;
 option go_package = "github.com/m-umarr/Go_auth_service/otp_service/proto";
 
 service OTPService {
-    rpc GenerateOTP(GenerateOTPRequest) returns (GenerateOTPResponse);
+  rpc GenerateOTP(GenerateOTPRequest) returns (GenerateOTPResponse);
+  rpc VerifyOTP(VerifyOTPRequest) returns (VerifyOTPResponse);
 }
 
 message GenerateOTPRequest {
-    string phone_number = 1;
+  string phone_number = 1;
 }
 
 message GenerateOTPResponse {
-    bool success = 1;
+  bool success = 1;
+}
+
+message VerifyOTPRequest {
+  string phone_number = 1;
+  string otp = 2;
+}
+
+message VerifyOTPResponse {
+  bool valid = 1;
 }
