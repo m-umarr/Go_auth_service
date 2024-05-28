@@ -41,7 +41,4 @@ This project demonstrates a basic setup of two microservices (`auth_service` and
     - `otp-service`:
         - `/otp.GenerateOtp`
 
-## Video Walkthrough
-
-[Provide a link to the video walkthrough explaining your thought process and implementation details.]
 
