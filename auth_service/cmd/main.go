@@ -8,6 +8,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/m-umarr/Go_auth_service/auth_service/db"
 	"github.com/m-umarr/Go_auth_service/auth_service/internal/handler"
+	"github.com/m-umarr/Go_auth_service/auth_service/messaging"
 	"github.com/m-umarr/Go_auth_service/auth_service/proto"
 	"github.com/m-umarr/Go_auth_service/otp_service/service"
 
@@ -26,6 +27,7 @@ func main() {
 	accountSid := os.Getenv("TWILIO_ACCOUNT_SID")
 	authToken := os.Getenv("TWILIO_AUTH_TOKEN")
 	fromPhone := os.Getenv("TWILIO_FROM_PHONE")
+	amqpURL := os.Getenv("AMQP_URL")
 
 	// Connect to the database
 	dbConn, err := db.Connect()
@@ -36,13 +38,20 @@ func main() {
 	// Initialize the OTP service
 	otpService := service.NewOTPService(accountSid, authToken, fromPhone, dbConn)
 
-	// Initialize the Auth service
-	authService := handler.NewAuthService(dbConn, otpService)
+	// Initialize the message publisher
+	publisher, err := messaging.NewPublisher(amqpURL)
+	if err != nil {
+		log.Fatalf("Failed to initialize publisher: %v", err)
+	}
+	defer publisher.Close()
+
+	// Create the auth service handler
+	authService := handler.NewAuthService(dbConn, publisher, otpService)
 
 	// Create a new gRPC server
 	s := grpc.NewServer()
 
-	// Register the Auth service handler with the gRPC server
+	// Register the auth service handler with the gRPC server
 	proto.RegisterAuthServiceServer(s, authService)
 
 	// Enable reflection for debugging

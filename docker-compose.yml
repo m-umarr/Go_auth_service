@@ -1,16 +1,55 @@
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:13
+  auth_service:
+    build: ./auth_service
+    container_name: auth_service
+    ports:
+      - "50051:50051"
     environment:
-      POSTGRES_USER: user
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_FROM_PHONE=${TWILIO_FROM_PHONE}
+      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
+    depends_on:
+      - db
+      - rabbitmq
+
+  otp_service:
+    build: ./otp_service
+    container_name: otp_service
+    ports:
+      - "50052:50052"
+    environment:
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_FROM_PHONE=${TWILIO_FROM_PHONE}
+      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
+    depends_on:
+      - db
+      - rabbitmq
+
+  db:
+    image: postgres:13
+    container_name: db
+    environment:
+      POSTGRES_DB: authdb
+      POSTGRES_USER: me
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: auth_db
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672" # RabbitMQ Management UI
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
 
 volumes:
-  pgdata:
+  postgres_data:

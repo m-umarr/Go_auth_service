@@ -2,9 +2,6 @@ package service
 
 import (
 	"database/sql"
-	"fmt"
-	"math/rand"
-	"time"
 
 	"github.com/m-umarr/Go_auth_service/otp_service/internal/twilio"
 )
@@ -19,9 +16,7 @@ func NewOTPService(accountSid, authToken, fromPhone string, db *sql.DB) *OTPServ
 }
 
 func (s *OTPService) SendOTP(phoneNumber string) error {
-	otp := generateOTP()
-	message := fmt.Sprintf("Your OTP is %s", otp)
-	_, err := s.twilioClient.SendSMS(phoneNumber, message)
+	_, err := s.twilioClient.SendSMS(phoneNumber)
 	if err != nil {
 		return err
 	}
@@ -35,10 +30,4 @@ func (s *OTPService) VerifyOTP(phoneNumber, otp string) bool {
 		return false
 	}
 	return true
-}
-
-func generateOTP() string {
-	rand.Seed(time.Now().UnixNano())
-	otp := rand.Intn(1000000)
-	return fmt.Sprintf("%06d", otp)
 }

@@ -28,7 +28,7 @@ func envSERVICESID() string {
 	return os.Getenv("TWILIO_SERVICES_ID")
 }
 
-func (c *Client) SendSMS(to, message string) (string, error) {
+func (c *Client) SendSMS(to string) (string, error) {
 
 	params := &twilioApi.CreateVerificationParams{}
 	params.SetTo(to)

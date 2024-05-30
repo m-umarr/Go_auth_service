@@ -3,11 +3,13 @@ package handler
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 
 	"github.com/m-umarr/Go_auth_service/auth_service/internal/repository"
+	"github.com/m-umarr/Go_auth_service/auth_service/messaging"
 	"github.com/m-umarr/Go_auth_service/auth_service/proto"
-	otp "github.com/m-umarr/Go_auth_service/otp_service/service"
+	"github.com/m-umarr/Go_auth_service/otp_service/service"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -15,22 +17,20 @@ import (
 
 type AuthService struct {
 	DB         *sql.DB
-	OTPService *otp.OTPService
+	Publisher  *messaging.Publisher
+	OTPService *service.OTPService
 	proto.UnimplementedAuthServiceServer
 }
 
-func NewAuthService(db *sql.DB, otpService *otp.OTPService) *AuthService {
+func NewAuthService(db *sql.DB, publisher *messaging.Publisher, otpService *service.OTPService) *AuthService {
 	return &AuthService{
 		DB:         db,
+		Publisher:  publisher,
 		OTPService: otpService,
 	}
 }
 
 func (s *AuthService) SignupWithPhoneNumber(ctx context.Context, req *proto.SignupRequest) (*proto.SignupResponse, error) {
-	if req.PhoneNumber == "" {
-		return nil, status.Error(codes.InvalidArgument, "Phone number is required")
-	}
-
 	userRepo := repository.NewUserRepository(s.DB)
 	err := userRepo.CreateUser(req.PhoneNumber)
 	if err != nil {
@@ -40,9 +40,16 @@ func (s *AuthService) SignupWithPhoneNumber(ctx context.Context, req *proto.Sign
 		return nil, status.Errorf(codes.Internal, "failed to create user: %v", err)
 	}
 
-	err = s.OTPService.SendOTP(req.PhoneNumber)
+	// Publish SendOTP message
+	message := map[string]string{"phone_number": req.PhoneNumber}
+	messageBytes, err := json.Marshal(message)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to send OTP: %v", err)
+		return nil, status.Errorf(codes.Internal, "failed to marshal message: %v", err)
+	}
+
+	err = s.Publisher.Publish("verification", messageBytes)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to publish message: %v", err)
 	}
 
 	return &proto.SignupResponse{Success: true}, nil

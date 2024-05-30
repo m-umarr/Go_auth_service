@@ -16,12 +16,20 @@ This project demonstrates a basic setup of two microservices (`auth_service` and
     ```
 
 2. **Environment Variables**:
-    - Create a `.env` file in the `auth_service` and `otp_service` directories and add the following:
+    - Create a `.env` file in the root directory and add the following:
     ```env
 
     # /.env
-    TWILIO_ACCOUNT_SID=your_twilio_account_sid
-    TWILIO_AUTH_TOKEN=your_twilio_auth_token
+    TWILIO_ACCOUNT_SID=YOUR_ACCOUNT_SID
+    TWILIO_AUTH_TOKEN=YOUR_AUTH_TOKEN
+    TWILIO_FROM_PHONE=YOUR_PHONE_NUMBER
+    TWILIO_SERVICES_ID=YOUR_SERVICE_ID
+    AMQP_URL=YOUR_AMPQ_URL
+    DB_HOST=localhost
+    DB_PORT=5432
+    DB_USER=USERNAME
+    DB_PASSWORD=PASSWORD
+    DB_NAME=DB
     ```
 
 3. **Run Docker Compose**:
