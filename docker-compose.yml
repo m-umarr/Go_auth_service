@@ -1,55 +1,61 @@
-version: '3.8'
+version: '3.7'
 
 services:
-  auth_service:
-    build: ./auth_service
-    container_name: auth_service
-    ports:
-      - "50051:50051"
-    environment:
-      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
-      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
-      - TWILIO_FROM_PHONE=${TWILIO_FROM_PHONE}
-      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
-    depends_on:
-      - db
-      - rabbitmq
-
-  otp_service:
-    build: ./otp_service
-    container_name: otp_service
-    ports:
-      - "50052:50052"
-    environment:
-      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
-      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
-      - TWILIO_FROM_PHONE=${TWILIO_FROM_PHONE}
-      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
-    depends_on:
-      - db
-      - rabbitmq
-
   db:
     image: postgres:13
-    container_name: db
     environment:
-      POSTGRES_DB: authdb
-      POSTGRES_USER: me
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-    ports:
-      - "5432:5432"
+      POSTGRES_DB: authdb
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
 
   rabbitmq:
-    image: rabbitmq:3-management
-    container_name: rabbitmq
+    image: "rabbitmq:3-management"
     ports:
       - "5672:5672"
-      - "15672:15672" # RabbitMQ Management UI
+      - "15672:15672"
     environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  auth_service:
+    build:
+      context: .
+      dockerfile: auth_service/Dockerfile
+    environment:
+      AUTH_SERVICE_PORT: ${AUTH_SERVICE_PORT}
+      DSN: ${DSN}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN}
+      TWILIO_FROM_PHONE: ${TWILIO_FROM_PHONE}
+      TWILIO_SERVICE_ID: ${TWILIO_SERVICE_ID}
+      AMQP_URL: ${AMQP_URL}
+    depends_on:
+      - db
+      - rabbitmq
+    ports:
+      - "${AUTH_SERVICE_PORT}:${AUTH_SERVICE_PORT}"
+
+  otp_service:
+    build:
+      context: .
+      dockerfile: otp_service/Dockerfile
+    environment:
+      OTP_SERVICE_PORT: ${OTP_SERVICE_PORT}
+      DSN: ${DSN}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN}
+      TWILIO_FROM_PHONE: ${TWILIO_FROM_PHONE}
+      TWILIO_SERVICE_ID: ${TWILIO_SERVICE_ID}
+      AMQP_URL: ${AMQP_URL}
+    depends_on:
+      - db
+      - rabbitmq
+    ports:
+      - "${OTP_SERVICE_PORT}:${OTP_SERVICE_PORT}"
 
 volumes:
   postgres_data:

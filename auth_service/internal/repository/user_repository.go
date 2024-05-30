@@ -25,7 +25,6 @@ func (r *UserRepository) CreateUser(phoneNumber string) error {
 		return errors.New("user already exists")
 	}
 
-	// Create the user
 	_, err = r.db.Exec("INSERT INTO users (phone_number) VALUES ($1)", phoneNumber)
 	return err
 }

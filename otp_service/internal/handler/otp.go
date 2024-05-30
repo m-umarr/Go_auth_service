@@ -8,11 +8,11 @@ import (
 )
 
 type OTPHandler struct {
+	otpService service.OTPService
 	proto.UnimplementedOTPServiceServer
-	otpService *service.OTPService
 }
 
-func NewOTPHandler(otpService *service.OTPService) *OTPHandler {
+func NewOTPHandler(otpService service.OTPService) *OTPHandler {
 	return &OTPHandler{otpService: otpService}
 }
 

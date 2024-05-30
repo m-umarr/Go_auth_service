@@ -1,14 +1,21 @@
 package messaging
 
 import (
+	"encoding/json"
 	"log"
 
+	"github.com/m-umarr/Go_auth_service/config"
+	"github.com/m-umarr/Go_auth_service/otp_service/service"
 	"github.com/streadway/amqp"
 )
 
 type Consumer struct {
 	conn    *amqp.Connection
 	channel *amqp.Channel
+}
+
+type SendOTPMessage struct {
+	PhoneNumber string `json:"phone_number"`
 }
 
 func NewConsumer(amqpURL string) (*Consumer, error) {
@@ -69,4 +76,25 @@ func (c *Consumer) Close() {
 	if err := c.conn.Close(); err != nil {
 		log.Printf("Error closing connection: %v", err)
 	}
+}
+
+func InitializeConsumer(cfg *config.Config, otpService *service.TwilioOTPService) *Consumer {
+	consumer, err := NewConsumer(cfg.AmqpURL)
+	if err != nil {
+		log.Fatalf("Failed to initialize consumer: %v", err)
+	}
+
+	err = consumer.Consume("verification", func(body []byte) error {
+		var msg SendOTPMessage
+		if err := json.Unmarshal(body, &msg); err != nil {
+			return err
+		}
+
+		return otpService.SendOTP(msg.PhoneNumber)
+	})
+	if err != nil {
+		log.Fatalf("Failed to consume messages: %v", err)
+	}
+
+	return consumer
 }

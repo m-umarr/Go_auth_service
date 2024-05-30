@@ -3,14 +3,14 @@ package main
 import (
 	"log"
 	"net"
-	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/m-umarr/Go_auth_service/auth_service/db"
+	"github.com/m-umarr/Go_auth_service/auth_service/internal/client"
 	"github.com/m-umarr/Go_auth_service/auth_service/internal/handler"
+	"github.com/m-umarr/Go_auth_service/auth_service/internal/repository"
 	"github.com/m-umarr/Go_auth_service/auth_service/messaging"
 	"github.com/m-umarr/Go_auth_service/auth_service/proto"
-	"github.com/m-umarr/Go_auth_service/otp_service/service"
+	"github.com/m-umarr/Go_auth_service/config"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -18,35 +18,35 @@ import (
 
 func main() {
 	// Load environment variables from .env file
-	err := godotenv.Load()
+	cfg, err := config.LoadConfig()
 	if err != nil {
-		log.Fatalf("Error loading .env file")
+		log.Fatalf("Failed to load config: %v", err)
 	}
 
-	// Get Twilio credentials from environment variables
-	accountSid := os.Getenv("TWILIO_ACCOUNT_SID")
-	authToken := os.Getenv("TWILIO_AUTH_TOKEN")
-	fromPhone := os.Getenv("TWILIO_FROM_PHONE")
-	amqpURL := os.Getenv("AMQP_URL")
-
 	// Connect to the database
-	dbConn, err := db.Connect()
+	dbConn, err := db.Connect(cfg.DSN)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	// Initialize the OTP service
-	otpService := service.NewOTPService(accountSid, authToken, fromPhone, dbConn)
+	conn, err := grpc.Dial(cfg.OTPServiceAddress, grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("Failed to connect to OTP service: %v", err)
+	}
+	defer conn.Close()
 
 	// Initialize the message publisher
-	publisher, err := messaging.NewPublisher(amqpURL)
+	publisher, err := messaging.NewPublisher(cfg.AmqpURL)
 	if err != nil {
 		log.Fatalf("Failed to initialize publisher: %v", err)
 	}
 	defer publisher.Close()
 
-	// Create the auth service handler
-	authService := handler.NewAuthService(dbConn, publisher, otpService)
+	userRepo := repository.NewUserRepository(dbConn)
+
+	otpClient := client.NewGRPCOTPClient(conn)
+	// Initialize the Auth service
+	authService := handler.NewAuthService(userRepo, publisher, otpClient)
 
 	// Create a new gRPC server
 	s := grpc.NewServer()
@@ -54,11 +54,11 @@ func main() {
 	// Register the auth service handler with the gRPC server
 	proto.RegisterAuthServiceServer(s, authService)
 
-	// Enable reflection for debugging
 	reflection.Register(s)
 
 	// Start listening on port 50051
-	lis, err := net.Listen("tcp", ":50051")
+	address := ":" + cfg.AuthServicePort
+	lis, err := net.Listen("tcp", address)
 	if err != nil {
 		log.Fatalf("Failed to listen on port 50051: %v", err)
 	}
