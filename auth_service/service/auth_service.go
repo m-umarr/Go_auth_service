@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/m-umarr/Go_auth_service/auth_service/internal/model"
-	"github.com/m-umarr/Go_auth_service/auth_service/internal/repository"
+	"github.com/m-umarr/Go_auth_service/auth_service/model"
+	"github.com/m-umarr/Go_auth_service/auth_service/repository"
 )
 
 var (

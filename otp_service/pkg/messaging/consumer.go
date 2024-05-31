@@ -5,7 +5,8 @@ import (
 	"log"
 
 	"github.com/m-umarr/Go_auth_service/otp_service/config"
-	"github.com/m-umarr/Go_auth_service/otp_service/internal/service"
+	"github.com/m-umarr/Go_auth_service/otp_service/service"
+
 	"github.com/streadway/amqp"
 )
 

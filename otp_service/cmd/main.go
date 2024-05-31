@@ -9,10 +9,10 @@ import (
 	"syscall"
 
 	"github.com/m-umarr/Go_auth_service/otp_service/config"
-	"github.com/m-umarr/Go_auth_service/otp_service/internal/handler"
-	"github.com/m-umarr/Go_auth_service/otp_service/internal/service"
+	"github.com/m-umarr/Go_auth_service/otp_service/handler"
 	"github.com/m-umarr/Go_auth_service/otp_service/pkg/messaging"
 	"github.com/m-umarr/Go_auth_service/otp_service/proto"
+	"github.com/m-umarr/Go_auth_service/otp_service/service"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"

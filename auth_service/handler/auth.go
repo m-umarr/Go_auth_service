@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/m-umarr/Go_auth_service/auth_service/internal/service"
 	"github.com/m-umarr/Go_auth_service/auth_service/proto"
+	"github.com/m-umarr/Go_auth_service/auth_service/service"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

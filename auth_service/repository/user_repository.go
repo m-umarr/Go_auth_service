@@ -1,7 +1,7 @@
 package repository
 
 import (
-	model "github.com/m-umarr/Go_auth_service/auth_service/internal/model"
+	model "github.com/m-umarr/Go_auth_service/auth_service/model"
 
 	"database/sql"
 	"errors"

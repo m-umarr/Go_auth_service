@@ -3,8 +3,8 @@ package handler
 import (
 	"context"
 
-	"github.com/m-umarr/Go_auth_service/otp_service/internal/service"
 	proto "github.com/m-umarr/Go_auth_service/otp_service/proto"
+	"github.com/m-umarr/Go_auth_service/otp_service/service"
 )
 
 type OTPHandler struct {

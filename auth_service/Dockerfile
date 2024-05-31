@@ -1,9 +1,9 @@
-FROM golang:1.21-alpine AS builder
+FROM golang:1.19-alpine AS builder
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
-
+# COPY go.mod go.sum ./
+COPY . ./
 RUN go mod download
 
 COPY ./auth_service .

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/m-umarr/Go_auth_service/otp_service/proto"
+
 	"google.golang.org/grpc"
 )
 

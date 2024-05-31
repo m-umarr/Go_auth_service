@@ -9,13 +9,13 @@ import (
 	"syscall"
 
 	"github.com/m-umarr/Go_auth_service/auth_service/config"
-	"github.com/m-umarr/Go_auth_service/auth_service/internal/db"
-	"github.com/m-umarr/Go_auth_service/auth_service/internal/handler"
-	"github.com/m-umarr/Go_auth_service/auth_service/internal/repository"
-	"github.com/m-umarr/Go_auth_service/auth_service/internal/service"
+	"github.com/m-umarr/Go_auth_service/auth_service/db"
+	"github.com/m-umarr/Go_auth_service/auth_service/handler"
 	"github.com/m-umarr/Go_auth_service/auth_service/pkg/client"
 	"github.com/m-umarr/Go_auth_service/auth_service/pkg/messaging"
 	"github.com/m-umarr/Go_auth_service/auth_service/proto"
+	"github.com/m-umarr/Go_auth_service/auth_service/repository"
+	"github.com/m-umarr/Go_auth_service/auth_service/service"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
