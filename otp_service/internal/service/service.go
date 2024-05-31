@@ -1,11 +1,11 @@
 package service
 
 import (
-	"github.com/m-umarr/Go_auth_service/otp_service/internal/twilio"
+	"github.com/m-umarr/Go_auth_service/otp_service/pkg/twilio"
 )
 
 type TwilioOTPService struct {
-	twilioClient *twilio.Client
+	twilioClient *twilio.TwilioClient
 }
 
 type OTPService interface {

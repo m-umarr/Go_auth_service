@@ -1,61 +1,54 @@
-version: '3.7'
+version: '3.8'
 
 services:
-  db:
-    image: postgres:13
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: authdb
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-
-  rabbitmq:
-    image: "rabbitmq:3-management"
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-
   auth_service:
     build:
-      context: .
-      dockerfile: auth_service/Dockerfile
+      context: ./auth_service
+      dockerfile: Dockerfile
     environment:
-      AUTH_SERVICE_PORT: ${AUTH_SERVICE_PORT}
-      DSN: ${DSN}
-      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID}
-      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN}
-      TWILIO_FROM_PHONE: ${TWILIO_FROM_PHONE}
-      TWILIO_SERVICE_ID: ${TWILIO_SERVICE_ID}
-      AMQP_URL: ${AMQP_URL}
-    depends_on:
-      - db
-      - rabbitmq
+      - DSN=postgres://me:root@auth-db/authdb?sslmode=disable
+      - AUTH_SERVICE_PORT=50051
+      - OTP_SERVICE_ADDRESS=otp_service:50052
+      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
     ports:
-      - "${AUTH_SERVICE_PORT}:${AUTH_SERVICE_PORT}"
+      - "50051:50051"
+    depends_on:
+      - auth-db
+      - rabbitmq
+      - otp_service
 
   otp_service:
     build:
-      context: .
-      dockerfile: otp_service/Dockerfile
+      context: ./otp_service
+      dockerfile: Dockerfile
     environment:
-      OTP_SERVICE_PORT: ${OTP_SERVICE_PORT}
-      DSN: ${DSN}
-      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID}
-      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN}
-      TWILIO_FROM_PHONE: ${TWILIO_FROM_PHONE}
-      TWILIO_SERVICE_ID: ${TWILIO_SERVICE_ID}
-      AMQP_URL: ${AMQP_URL}
-    depends_on:
-      - db
-      - rabbitmq
+      - TWILIO_ACCOUNT_SID=ACad6b3583760bc9503f4168895ec58aad
+      - TWILIO_AUTH_TOKEN=e4137e1e5be07acac1dc32f53bc57911
+      - TWILIO_FROM_PHONE=+923104747899
+      - TWILIO_SERVICES_ID=VA25c3799dc58795c358d2d0358e29aa6f
+      - OTP_SERVICE_PORT=50052
+      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
     ports:
-      - "${OTP_SERVICE_PORT}:${OTP_SERVICE_PORT}"
+      - "50052:50052"
+    depends_on:
+      - rabbitmq
+
+  auth-db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: me
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: authdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - auth-db-data:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
 
 volumes:
-  postgres_data:
+  auth-db-data:

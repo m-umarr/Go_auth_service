@@ -9,12 +9,12 @@ import (
 	twilioApi "github.com/twilio/twilio-go/rest/verify/v2"
 )
 
-type Client struct {
+type TwilioClient struct {
 	Client *twilio.RestClient
 }
 
-func NewClient(accountSID, authToken, from string) *Client {
-	return &Client{Client: twilio.NewRestClientWithParams(twilio.ClientParams{
+func NewClient(accountSID, authToken, from string) *TwilioClient {
+	return &TwilioClient{Client: twilio.NewRestClientWithParams(twilio.ClientParams{
 		Username: accountSID,
 		Password: authToken,
 	})}
@@ -28,7 +28,7 @@ func envSERVICESID() string {
 	return os.Getenv("TWILIO_SERVICES_ID")
 }
 
-func (c *Client) SendSMS(to string) (string, error) {
+func (c *TwilioClient) SendSMS(to string) (string, error) {
 
 	params := &twilioApi.CreateVerificationParams{}
 	params.SetTo(to)
@@ -42,7 +42,7 @@ func (c *Client) SendSMS(to string) (string, error) {
 	return *resp.AccountSid, nil
 }
 
-func (c *Client) OtpVerification(to, otp string) error {
+func (c *TwilioClient) OtpVerification(to, otp string) error {
 	params := &twilioApi.CreateVerificationCheckParams{}
 	params.SetTo(to)
 	params.SetCode(otp)
