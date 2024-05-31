@@ -3,52 +3,50 @@ version: '3.8'
 services:
   auth_service:
     build:
-      context: ./auth_service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: auth_service/Dockerfile
     environment:
-      - DSN=postgres://me:root@auth-db/authdb?sslmode=disable
-      - AUTH_SERVICE_PORT=50051
-      - OTP_SERVICE_ADDRESS=otp_service:50052
-      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
+      - AMQP_URL=${AMQP_URL}
+      - DSN=${DSN}
+      - AUTH_SERVICE_PORT=${AUTH_SERVICE_PORT}
+      - OTP_SERVICE_ADDRESS=${OTP_SERVICE_ADDRESS}
     ports:
-      - "50051:50051"
+      - "${AUTH_SERVICE_PORT}:${AUTH_SERVICE_PORT}"
     depends_on:
-      - auth-db
       - rabbitmq
-      - otp_service
+      - auth-db
 
   otp_service:
     build:
-      context: ./otp_service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: otp_service/Dockerfile
     environment:
-      - TWILIO_ACCOUNT_SID=ACad6b3583760bc9503f4168895ec58aad
-      - TWILIO_AUTH_TOKEN=e4137e1e5be07acac1dc32f53bc57911
-      - TWILIO_FROM_PHONE=+923104747899
-      - TWILIO_SERVICES_ID=VA25c3799dc58795c358d2d0358e29aa6f
-      - OTP_SERVICE_PORT=50052
-      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_FROM_PHONE=${TWILIO_FROM_PHONE}
+      - TWILIO_SERVICES_ID=${TWILIO_SERVICES_ID}
+      - AMQP_URL=${AMQP_URL}
+      - OTP_SERVICE_PORT=${OTP_SERVICE_PORT}
     ports:
-      - "50052:50052"
+      - "${OTP_SERVICE_PORT}:${OTP_SERVICE_PORT}"
     depends_on:
       - rabbitmq
 
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
   auth-db:
-    image: postgres:13
+    image: postgres:latest
     environment:
       POSTGRES_USER: me
       POSTGRES_PASSWORD: root
       POSTGRES_DB: authdb
     ports:
       - "5432:5432"
-    volumes:
-      - auth-db-data:/var/lib/postgresql/data
 
-  rabbitmq:
-    image: rabbitmq:3-management
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-
-volumes:
-  auth-db-data:
+networks:
+  default:
+    name: go_auth_network

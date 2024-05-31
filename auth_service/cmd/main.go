@@ -4,11 +4,15 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/m-umarr/Go_auth_service/auth_service/config"
 	"github.com/m-umarr/Go_auth_service/auth_service/internal/db"
 	"github.com/m-umarr/Go_auth_service/auth_service/internal/handler"
 	"github.com/m-umarr/Go_auth_service/auth_service/internal/repository"
+	"github.com/m-umarr/Go_auth_service/auth_service/internal/service"
 	"github.com/m-umarr/Go_auth_service/auth_service/pkg/client"
 	"github.com/m-umarr/Go_auth_service/auth_service/pkg/messaging"
 	"github.com/m-umarr/Go_auth_service/auth_service/proto"
@@ -32,7 +36,7 @@ func main() {
 
 	// Initialize the message publisher
 
-	userRepo := repository.NewUserRepository(dbConn)
+	repo := repository.NewUserRepository(dbConn)
 
 	conn, err := grpc.Dial(cfg.OTPServiceAddress, grpc.WithInsecure())
 	if err != nil {
@@ -49,13 +53,16 @@ func main() {
 	defer publisher.Close()
 
 	// Initialize the Auth service
-	authService := handler.NewAuthService(userRepo, publisher, otpClient)
+	authService := service.NewAuthService(*repo, publisher, otpClient)
+
+	// Create the auth service handler
+	authHandler := handler.NewAuthServiceHandler(authService)
 
 	// Create a new gRPC server
 	s := grpc.NewServer()
 
 	// Register the auth service handler with the gRPC server
-	proto.RegisterAuthServiceServer(s, authService)
+	proto.RegisterAuthServiceServer(s, authHandler)
 
 	reflection.Register(s)
 
@@ -66,7 +73,18 @@ func main() {
 	}
 
 	log.Printf("Auth service is running on port %s", cfg.AuthServicePort)
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("Failed to serve: %v", err)
-	}
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		if err := s.Serve(lis); err != nil {
+			log.Fatalf("Failed to serve: %v", err)
+		}
+	}()
+
+	<-stop
+	log.Println("Received stop signal, gracefully shutting down...")
+	s.GracefulStop()
+	log.Println("Server stopped")
 }

@@ -1,4 +1,4 @@
-FROM golang:1.18-alpine AS builder
+FROM golang:1.21-alpine AS builder
 
 WORKDIR /app
 
@@ -6,14 +6,18 @@ COPY go.mod go.sum ./
 
 RUN go mod download
 
-COPY . .
+COPY ./otp_service .
 
-RUN go build -o /otp_service cmd/main.go
+RUN go build -o /app/otp_service ./cmd/main.go
 
 FROM alpine:latest
 
-COPY --from=builder /otp_service /otp_service
+WORKDIR /app
+
+COPY --from=builder /app/otp_service /app/otp_service
+
+RUN chmod +x /app/otp_service
 
 EXPOSE 50052
 
-CMD ["/otp_service"]
+CMD ["./otp_service"]

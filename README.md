@@ -11,8 +11,7 @@ This project demonstrates a basic setup of two microservices (`auth_service` and
 
 1. **Clone the repository**:
     ```sh
-    git clone <repository_url>
-    cd <repository_name>
+    git clone git@github.com:m-umarr/Go_auth_service.git
     ```
 
 2. **Environment Variables**:
@@ -34,7 +33,7 @@ This project demonstrates a basic setup of two microservices (`auth_service` and
 
 3. **Run Docker Compose**:
     ```sh
-    docker-compose up --build
+    docker compose up --build
     ```
 
 4. **Endpoints**:

@@ -1,8 +1,6 @@
 package service
 
-import (
-	model "github.com/m-umarr/Go_auth_service/auth_service/internal/model"
-)
+import "github.com/m-umarr/Go_auth_service/auth_service/internal/model"
 
 type Auth interface {
 	CreateUser(phoneNumber string) error

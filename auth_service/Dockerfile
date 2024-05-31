@@ -1,4 +1,4 @@
-FROM golang:1.18-alpine AS builder
+FROM golang:1.21-alpine AS builder
 
 WORKDIR /app
 
@@ -6,14 +6,18 @@ COPY go.mod go.sum ./
 
 RUN go mod download
 
-COPY . .
+COPY ./auth_service .
 
-RUN go build -o /auth_service cmd/main.go
+RUN go build -o /app/auth_service ./cmd/main.go
 
 FROM alpine:latest
 
-COPY --from=builder /auth_service /auth_service
+WORKDIR /app
+
+COPY --from=builder /app/auth_service /app/auth_service
+
+RUN chmod +x /app/auth_service
 
 EXPOSE 50051
 
-CMD ["/auth_service"]
+CMD ["./auth_service"]

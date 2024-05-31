@@ -6,12 +6,15 @@ import (
 	"github.com/streadway/amqp"
 )
 
-type Publisher struct {
+type Publisher interface {
+	Publish(topic string, message []byte) error
+}
+type PublisherImpl struct {
 	conn    *amqp.Connection
 	channel *amqp.Channel
 }
 
-func NewPublisher(amqpURL string) (*Publisher, error) {
+func NewPublisher(amqpURL string) (*PublisherImpl, error) {
 	conn, err := amqp.Dial(amqpURL)
 	if err != nil {
 		return nil, err
@@ -22,10 +25,10 @@ func NewPublisher(amqpURL string) (*Publisher, error) {
 		return nil, err
 	}
 
-	return &Publisher{conn: conn, channel: ch}, nil
+	return &PublisherImpl{conn: conn, channel: ch}, nil
 }
 
-func (p *Publisher) Publish(queueName string, body []byte) error {
+func (p *PublisherImpl) Publish(queueName string, body []byte) error {
 	_, err := p.channel.QueueDeclare(
 		queueName,
 		true,
@@ -54,7 +57,7 @@ func (p *Publisher) Publish(queueName string, body []byte) error {
 	return nil
 }
 
-func (p *Publisher) Close() {
+func (p *PublisherImpl) Close() {
 	if err := p.channel.Close(); err != nil {
 		log.Printf("Error closing channel: %v", err)
 	}
