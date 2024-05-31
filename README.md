@@ -31,7 +31,15 @@ This project demonstrates a basic setup of two microservices (`auth_service` and
     DB_NAME=DB
     ```
 
-3. **Run Docker Compose**:
+3. **Run Services**:
+    ```sh
+    go run auth_service/cmd/main.go
+    &&
+    go run otp_service/cmd/main.go
+    ```
+
+ 
+3. **Run Docker Compose**: (optional)
     ```sh
     docker compose up --build
     ```
